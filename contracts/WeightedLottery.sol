@@ -6,19 +6,19 @@ import "hardhat/console.sol";
 import '@openzeppelin/contracts/access/Ownable.sol';
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-error LotteryInProgress();
-error LotteryNotStarted();
-error LotteryNotReady();
+error RaffleInProgress();
+error RaffleNotStarted();
+error RaffleNotReady();
 error WinnerNotPicked();
 
-contract WeightedLottery is Ownable, ReentrancyGuard {
+contract WeightedRaffle is Ownable, ReentrancyGuard {
     uint public totalEntries;
     address[] public enteredAddresses;
     mapping(address => uint) public enteredAmounts;
     uint[] public enteredAmountCdf;
     uint public totalPot;
-    bool public lotteryInProgress;
-    uint public lotteryStartedBlock;
+    bool public raffleInProgress;
+    uint public raffleStartedBlock;
     address public currentWinner;
 
     event WinnerPicked(address winner, uint entries, uint winnings);
@@ -27,12 +27,12 @@ contract WeightedLottery is Ownable, ReentrancyGuard {
         enteredAmountCdf.push(0);
     }
 
-    function resetLottery() public {
+    function resetRaffle() public {
         if (currentWinner == address(0)) {
             revert WinnerNotPicked();
         }
-        if (!lotteryInProgress) {
-            revert LotteryNotStarted();
+        if (!raffleInProgress) {
+            revert RaffleNotStarted();
         }
         // Loop through enteredAddresses and clear enteredAmounts
         for (uint i = 0; i < enteredAddresses.length; i++) {
@@ -44,13 +44,13 @@ contract WeightedLottery is Ownable, ReentrancyGuard {
         delete enteredAmountCdf;
         enteredAmountCdf.push(0);
         delete totalPot;
-        lotteryInProgress = false;
+        raffleInProgress = false;
         delete currentWinner;
     }
 
-    function enterLottery() external payable {
-        if (lotteryInProgress) {
-            revert LotteryInProgress();
+    function enterRaffle() external payable {
+        if (raffleInProgress) {
+            revert RaffleInProgress();
         }
 
         enteredAddresses.push(msg.sender);
@@ -61,25 +61,25 @@ contract WeightedLottery is Ownable, ReentrancyGuard {
     }
 
     function startPickingWinner() external onlyOwner {
-        if (lotteryInProgress) {
-            revert LotteryInProgress();
+        if (raffleInProgress) {
+            revert RaffleInProgress();
         }
-        lotteryInProgress = true;
-        lotteryStartedBlock = block.number;
+        raffleInProgress = true;
+        raffleStartedBlock = block.number;
     }
 
     function revealWinner() external onlyOwner returns (address) {
         if (currentWinner != address(0)) {
             return currentWinner;
         }
-        if (!lotteryInProgress) {
-            revert LotteryNotStarted();
+        if (!raffleInProgress) {
+            revert RaffleNotStarted();
         }
-        if (block.number <= lotteryStartedBlock + 20) {
-            revert LotteryNotReady();
+        if (block.number <= raffleStartedBlock + 20) {
+            revert RaffleNotReady();
         }
 
-        uint winningAmount = uint(blockhash(lotteryStartedBlock + 20)) % totalPot;
+        uint winningAmount = uint(blockhash(raffleStartedBlock + 20)) % totalPot;
 
         // Binary Search
         uint lower = uint(0);

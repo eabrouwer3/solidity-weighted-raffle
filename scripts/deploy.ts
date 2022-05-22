@@ -3,10 +3,10 @@ import { ethers } from "hardhat";
 async function main() {
 
   // We get the contract to deploy
-  const WeightedLottery = await ethers.getContractFactory("WeightedLottery");
-  const weightedLottery = await WeightedLottery.deploy();
+  const WeightedRaffle = await ethers.getContractFactory("WeightedRaffle");
+  const weightedRaffle = await WeightedRaffle.deploy();
 
-  console.log("WeightedLottery deployed to:", weightedLottery.address);
+  console.log("WeightedRaffle deployed to:", weightedRaffle.address);
 }
 
 
