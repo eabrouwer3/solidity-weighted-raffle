@@ -8,6 +8,7 @@ import "../src/WeightedRaffle.sol";
 
 contract WeightedRaffleTest is Test {
     WeightedRaffle weightedRaffle;
+    event WinnerPicked(address winner, uint entries, uint winnings);
 
     function setUp() public {
         weightedRaffle = new WeightedRaffle();
@@ -24,6 +25,11 @@ contract WeightedRaffleTest is Test {
         weightedRaffle.enterRaffle{value:3 ether}();
         vm.prank(address(2));
         weightedRaffle.enterRaffle{value:2 ether}();
+    }
+
+    function testSetup() public {
+        assertEq(weightedRaffle.owner(), 0xb4c79daB8f259C7Aee6E5b2Aa729821864227e84);
+        assertEq(weightedRaffle.enteredAmountCdf(0), 0 ether);
     }
 
     function test3EntriesSetCorrectState() public {
@@ -45,5 +51,24 @@ contract WeightedRaffleTest is Test {
         assertEq(weightedRaffle.totalPot(), 6 ether);
 
         assertEq(weightedRaffle.totalEntries(), 3);
+    }
+
+    function testPickingWinner() public {
+        do3Entries();
+
+        // Raffle not started (haven't started picking the winner yet)
+        vm.expectRevert(RaffleNotStarted.selector);
+        weightedRaffle.revealWinner();
+
+        // Raffle not ready (not yet 20 blocks)
+        weightedRaffle.startPickingWinner();
+        vm.expectRevert(RaffleNotReady.selector);
+        weightedRaffle.revealWinner();
+
+        // Raffle Ready
+        vm.roll(100);
+        vm.expectEmit(true, true, false, false);
+        emit WinnerPicked(address(0), 3, 6 ether);
+        weightedRaffle.revealWinner();
     }
 }
