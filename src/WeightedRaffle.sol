@@ -1,10 +1,8 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
-
-import '@openzeppelin/contracts/access/Ownable.sol';
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "openzeppelin-contracts/contracts/access/Ownable.sol";
+import "openzeppelin-contracts/contracts/security/ReentrancyGuard.sol";
 
 error RaffleInProgress();
 error RaffleNotStarted();
